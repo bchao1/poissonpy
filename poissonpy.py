@@ -187,5 +187,5 @@ if __name__ == "__main__":
     gt = f(solver.x_grid, solver.y_grid)
     solution = solver.solve()
 
-    utils.plot_3d(solver.x_grid, solver.y_grid, solution)
-    utils.plot_3d(solver.x_grid, solver.y_grid, gt)
+    utils.plot_3d(solver.x_grid, solver.y_grid, solution, "solution")
+    utils.plot_3d(solver.x_grid, solver.y_grid, gt, "ground truth")

@@ -13,7 +13,7 @@ def get_grid_ids(grid):
     grid_ids = np.arange(grid.shape[0] * grid.shape[1]).reshape(grid.shape[0], grid.shape[1])
     return grid_ids
 
-def plot_3d(X, Y, Z):
+def plot_3d(X, Y, Z, title):
     fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
 
     # Plot the surface.
@@ -28,4 +28,5 @@ def plot_3d(X, Y, Z):
     # Add a color bar which maps values to colors.
     fig.colorbar(surf, shrink=0.5, aspect=5)
 
+    plt.title(title)
     plt.show()
