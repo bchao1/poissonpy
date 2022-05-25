@@ -3,7 +3,7 @@ Plug-and-play library for solving 2D Poisson equations. Useful tool in scientifi
 
 ## Features
 - Solve the Poisson equation on sqaure or non-square rectangular grids.
-- Solve the Poisson equation on arbitrary region shape.
+- Solve the Poisson equation on regions with arbitrary shape.
 - Define arbitrary boundary and interior conditions using `sympy` function experssions or `numpy` arrays.
 - Define Dirichlet, Neumann, or mixed boundary conditions.
 
