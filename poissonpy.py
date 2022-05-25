@@ -8,6 +8,7 @@ import seaborn as sns
 import utils
 
 # inner region conditions 
+# laplacian diag matrix construction
 
 class Poisson2DRectangle:
     """ 
@@ -30,6 +31,7 @@ class Poisson2DRectangle:
         
         self.dx = x[1] - x[0]
         self.dy = y[1] - y[0]
+        print(self.dx, self.dy)
 
         self.x_grid, self.y_grid = np.meshgrid(x, y)
         self.xs = self.x_grid.flatten()
@@ -38,11 +40,12 @@ class Poisson2DRectangle:
         self.interior = interior
         self.boundary = boundary
         
+        self.A, self.b = self.build_linear_system()
 
     def build_linear_system(self):
 
-        interior_ids = np.arange(self.X + 1, 2 * self.X - 1) + self.X * np.expand_dims(np.arange(self.Y - 2), 1)
-        interior_ids = interior_ids.flatten()
+        self.interior_ids = np.arange(self.X + 1, 2 * self.X - 1) + self.X * np.expand_dims(np.arange(self.Y - 2), 1)
+        self.interior_ids = self.interior_ids.flatten()
         boundary_ids = {
             "left": self.X * np.arange(1, self.Y - 1),
             "right": self.X * np.arange(1, self.Y - 1) + (self.X - 1),
@@ -50,29 +53,30 @@ class Poisson2DRectangle:
             "bottom": np.arange(self.X * self.Y - self.X + 1, self.X * self.Y - 1)
         }
 
-        self.all_ids = np.concatenate([interior_ids, np.concatenate(list(boundary_ids.values()))]) 
+        self.all_ids = np.concatenate([self.interior_ids, np.concatenate(list(boundary_ids.values()))]) 
         self.all_ids.sort()
 
         A = scipy.sparse.lil_matrix((len(self.all_ids), len(self.all_ids)))
         b = np.zeros(len(self.all_ids))
 
-        interior_pos = np.searchsorted(self.all_ids, interior_ids)
+        self.interior_pos = np.searchsorted(self.all_ids, self.interior_ids)
         boundary_pos = {
             bd: np.searchsorted(self.all_ids, boundary_ids[bd]) for bd in boundary_ids
         }
 
         # interior - laplacian
-        n1_pos = np.searchsorted(self.all_ids, interior_ids - 1)
-        n2_pos = np.searchsorted(self.all_ids, interior_ids + 1)
-        n3_pos = np.searchsorted(self.all_ids, interior_ids - self.X)
-        n4_pos = np.searchsorted(self.all_ids, interior_ids + self.X)
+        n1_pos = np.searchsorted(self.all_ids, self.interior_ids - 1)
+        n2_pos = np.searchsorted(self.all_ids, self.interior_ids + 1)
+        n3_pos = np.searchsorted(self.all_ids, self.interior_ids - self.X)
+        n4_pos = np.searchsorted(self.all_ids, self.interior_ids + self.X)
         
-        A[interior_pos, n1_pos] = 1 / (self.dx * self.dy) 
-        A[interior_pos, n2_pos] = 1 / (self.dx * self.dy)
-        A[interior_pos, n3_pos] = 1 / (self.dx * self.dy)
-        A[interior_pos, n4_pos] = 1 / (self.dx * self.dy)
-        A[interior_pos, interior_pos] = -4 / (self.dx * self.dy)
-        b[interior_pos] = self.interior(self.xs[interior_ids], self.ys[interior_ids])
+        # Discrete laplacian here important!
+        A[self.interior_pos, n1_pos] = 1 / (self.dx**2)
+        A[self.interior_pos, n2_pos] = 1 / (self.dx**2)
+        A[self.interior_pos, n3_pos] = 1 / (self.dy**2)
+        A[self.interior_pos, n4_pos] = 1 / (self.dy**2)
+        A[self.interior_pos, self.interior_pos] = -2 / (self.dx**2) + -2 / (self.dy**2)
+        b[self.interior_pos] = self.interior(self.xs[self.interior_ids], self.ys[self.interior_ids])
 
 
         for bd, (bd_func, mode) in self.boundary.items():
@@ -106,8 +110,9 @@ class Poisson2DRectangle:
         return A.tocsr(), b
 
     def solve(self):
-        A, b = self.build_linear_system()
-        x = scipy.sparse.linalg.spsolve(A, b)
+        # multigrid solver result bad?
+        #x = scipy.sparse.linalg.bicg(A, b)[0]
+        x = scipy.sparse.linalg.spsolve(self.A, self.b)
 
         grid_ids = np.arange(self.Y * self.X)
         all_pos = np.searchsorted(grid_ids, self.all_ids)
@@ -116,6 +121,17 @@ class Poisson2DRectangle:
         solution_grid[all_pos] = x
         solution_grid = solution_grid.reshape(self.Y, self.X)
         return solution_grid
+    
+    def estimated_laplacian(self, f):
+        val = f(self.x_grid, self.y_grid).flatten()
+        est_lap = (self.A @ val[self.all_ids])[self.interior_pos]
+        grid_ids = np.arange(self.Y * self.X)
+        interior_pos = np.searchsorted(grid_ids, self.interior_ids)
+        solution_grid = np.zeros(self.Y * self.X)
+        solution_grid[interior_pos] = est_lap
+        solution_grid = solution_grid.reshape(self.Y, self.X)
+        return solution_grid
+        
 
 
 class Poisson2DRegion:
@@ -126,37 +142,43 @@ class Poisson2DRegion:
         pass
 
 if __name__ == "__main__": 
-    from sympy import lambdify, sin, cos, diff
+    from sympy import lambdify, sin, cos, diff, Pow
     from sympy.abc import x, y
-
-    f = sin(x) + cos(y)
+    
+    # analytic = sin(x) + cos(y)
+    # laplacian = -sin(x) - cos(y)
+    f = x * sin(x) + y * cos(y)
     laplacian = diff(f, x, 2) + diff(f, y, 2)
 
+    # 
     lambda_f = lambdify([x, y], f, "numpy")
-
-    # analytic = sin(x) + cos(y)
     interior = lambdify([x, y], laplacian, "numpy")
 
     # possible boundary conditions: neumann_x, neumann_y, dirichlet
 
-    left = lambdify([x, y], diff(f, x, 1), "numpy")
-    right = lambdify([x, y], diff(f, x, 1), "numpy")
-    top = lambdify([x, y], diff(f, y, 1), "numpy")
+    left = lambdify([x, y], f, "numpy")
+    right = lambdify([x, y], f, "numpy")
+    top = lambdify([x, y], f, "numpy")
     bottom = lambdify([x, y], f, "numpy")
 
+    # neumann boundary results bad
     boundary = {
-        "left": (left, "neumann_x"),
-        "right": (right, "neumann_x"),
-        "top": (top, "neumann_y"),
+        "left": (left, "dirichlet"),
+        "right": (right, "dirichlet"),
+        "top": (top, "dirichlet"),
         "bottom": (bottom, "dirichlet")
     }
 
     solver = Poisson2DRectangle(
-        ((-6, -6), (6, 6)), interior, boundary, 100, 100)
+        ((-10, -5), (10, 5)), interior, boundary, 100, 100)
 
     gt = lambda_f(solver.x_grid, solver.y_grid)
+    gt_laplacian = interior(solver.x_grid, solver.y_grid)
+    es_laplacian = solver.estimated_laplacian(lambda_f)
 
     solution = solver.solve()
+    #utils.plot_3d(solver.x_grid, solver.y_grid, gt_laplacian)
+    #utils.plot_3d(solver.x_grid, solver.y_grid, es_laplacian)
     utils.plot_3d(solver.x_grid, solver.y_grid, solution)
     utils.plot_3d(solver.x_grid, solver.y_grid, gt)
     #sns.heatmap(gt)
