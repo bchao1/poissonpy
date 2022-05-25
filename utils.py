@@ -3,6 +3,11 @@ from matplotlib import cm
 from matplotlib.ticker import LinearLocator
 import numpy as np
 
+from sympy import lambdify
+from sympy.abc import x, y
+
+def get_2d_sympy_function(expr):
+    return lambdify([x, y], expr, "numpy")
 
 def get_grid_ids(grid):
     grid_ids = np.arange(grid.shape[0] * grid.shape[1]).reshape(grid.shape[0], grid.shape[1])

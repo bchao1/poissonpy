@@ -31,16 +31,26 @@ class Poisson2DRectangle:
         
         self.dx = x[1] - x[0]
         self.dy = y[1] - y[0]
-        print(self.dx, self.dy)
 
-        self.x_grid, self.y_grid = np.meshgrid(x, y)
+        self._x_grid, self._y_grid = np.meshgrid(x, y)
         self.xs = self.x_grid.flatten()
         self.ys = self.y_grid.flatten()
 
         self.interior = interior
         self.boundary = boundary
+        for bd, (_, mode) in self.boundary.items():
+            assert bd in ["left", "right", "top", "bottom"] 
+            assert mode in ["dirichlet", "neumann_x", "neumann_y"]
         
         self.A, self.b = self.build_linear_system()
+
+    @property
+    def x_grid(self):
+        return self._x_grid
+
+    @property
+    def y_grid(self):
+        return self._y_grid
 
     def build_linear_system(self):
 
@@ -150,21 +160,20 @@ if __name__ == "__main__":
     
     # analytic = sin(x) + cos(y)
     # laplacian = -sin(x) - cos(y)
-    f = x * sin(x) + y * cos(y)
-    laplacian = diff(f, x, 2) + diff(f, y, 2)
+    f_expr = x * sin(x) + y * cos(y)
+    laplacian_expr = diff(f_expr, x, 2) + diff(f_expr, y, 2)
 
-    # 
-    lambda_f = lambdify([x, y], f, "numpy")
-    interior = lambdify([x, y], laplacian, "numpy")
+    f = utils.get_2d_sympy_function(f_expr)
+    laplacian = utils.get_2d_sympy_function(laplacian_expr)
 
     # possible boundary conditions: neumann_x, neumann_y, dirichlet
 
-    left = lambdify([x, y], f, "numpy")
-    right = lambdify([x, y], f, "numpy")
-    top = lambdify([x, y], f, "numpy")
-    bottom = lambdify([x, y], f, "numpy")
+    interior = laplacian
+    left = f
+    right = f
+    top = f
+    bottom = f
 
-    # neumann boundary results bad
     boundary = {
         "left": (left, "dirichlet"),
         "right": (right, "dirichlet"),
@@ -175,15 +184,8 @@ if __name__ == "__main__":
     solver = Poisson2DRectangle(
         ((-10, -5), (10, 5)), interior, boundary, 100, 100)
 
-    gt = lambda_f(solver.x_grid, solver.y_grid)
-    gt_laplacian = interior(solver.x_grid, solver.y_grid)
-    es_laplacian = solver.estimated_laplacian(lambda_f)
-
+    gt = f(solver.x_grid, solver.y_grid)
     solution = solver.solve()
-    #utils.plot_3d(solver.x_grid, solver.y_grid, gt_laplacian)
-    #utils.plot_3d(solver.x_grid, solver.y_grid, es_laplacian)
+
     utils.plot_3d(solver.x_grid, solver.y_grid, solution)
     utils.plot_3d(solver.x_grid, solver.y_grid, gt)
-    #sns.heatmap(gt)
-
-    #plt.show()
