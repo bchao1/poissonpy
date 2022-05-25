@@ -1,11 +1,14 @@
 # poissonpy
-Plug-and-play library for solving 2D Poisson equations. Useful tool in scientific computing prototyping, image and video processing, computer graphics.
+Plug-and-play standalone library for solving 2D Poisson equations. Useful tool in scientific computing prototyping, image and video processing, computer graphics.
 
 ## Features
 - Solves the Poisson equation on sqaure or non-square rectangular grids.
 - Solves the Poisson equation on regions with arbitrary shape.
 - Supports arbitrary boundary and interior conditions using `sympy` function experssions or `numpy` arrays.
 - Supports Dirichlet, Neumann, or mixed boundary conditions.
+
+## Disclaimer
+This package is only used to solve 2D Poisson equations. If you are looking for a general purpose and optimized PDE library, you might want to checkout the [FEniCSx project](https://fenicsproject.org/index.html).
 
 ## Usage 
 

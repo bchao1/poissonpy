@@ -89,7 +89,7 @@ class Poisson2DRectangle:
 
         if isinstance(self.interior, types.FunctionType):
             b[self.interior_pos] = self.interior(self.xs[self.interior_ids], self.ys[self.interior_ids])
-        elif isinstance(self.interior, (np.array, int, float)):
+        elif isinstance(self.interior, (int, float)):
             b[self.interior_pos] = self.interior
 
 
@@ -99,7 +99,7 @@ class Poisson2DRectangle:
 
             if isinstance(bd_func, types.FunctionType):
                 b[bd_pos] = bd_func(self.xs[bd_ids], self.ys[bd_ids])
-            elif isinstance(bd_func, (np.array, int, float)):
+            elif isinstance(bd_func, (int, float)):
                 b[bd_pos] = bd_func
 
             if mode == "dirichlet":
