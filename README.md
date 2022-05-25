@@ -11,7 +11,6 @@ Plug-and-play standalone library for solving 2D Poisson equations. Useful tool i
 This package is only used to solve 2D Poisson equations. If you are looking for a general purpose and optimized PDE library, you might want to checkout the [FEniCSx project](https://fenicsproject.org/index.html).
 
 ## Usage 
-
 Import necessary libraries. `poissonpy` utilizes `numpy` and `sympy` greatly, so its best to import both:
 
 ```python
@@ -22,6 +21,7 @@ from sympy.abc import x, y
 import poissonpy
 ```
 
+### Compare with Analytical Solution
 Define functions using `sympy` function expressions or `numpy` arrays:
 
 ```python
@@ -60,3 +60,34 @@ poissonpy.plot_3d(solver.x_grid, solver.y_grid, f(solver.x_grid, solver.y_grid))
 |Solution|Ground truth|
 |--|--|
 |![](data/solution.png)|![](data/ground_truth.png)|
+
+### Laplace Equation
+It's also straightforward to define a Laplace equation - **we simply set the interior laplacian value to 0**. In the following example, we set the boundary values to be sptially-varying periodic functions.
+
+```python
+interior = 0 # laplace equation form
+left = utils.get_2d_sympy_function(sin(y))
+right = utils.get_2d_sympy_function(sin(y))
+top = utils.get_2d_sympy_function(sin(x))
+bottom = utils.get_2d_sympy_function(sin(x))
+
+boundary = {
+    "left": (left, "dirichlet"),
+    "right": (right, "dirichlet"),
+    "top": (top, "dirichlet"),
+    "bottom": (bottom, "dirichlet")
+}
+```
+
+Solve the Laplace equation:
+
+```python
+solver = Poisson2DRectangle(
+    ((-2*np.pi, -2*np.pi), (2*np.pi, 2*np.pi)), interior, boundary, 100, 100)
+solution = solver.solve()
+utils.plot_3d(solver.x_grid, solver.y_grid, solution, "solution")
+```
+
+|3D surface plot|2D heatmap|
+|--|--|
+|![](data/laplace_sol_3d.png)|![](data/laplace_sol_2d.png)|

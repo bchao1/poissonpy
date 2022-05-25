@@ -177,11 +177,11 @@ if __name__ == "__main__":
 
     # possible boundary conditions: neumann_x, neumann_y, dirichlet
 
-    interior = laplacian
-    left = f
-    right = f
-    top = f
-    bottom = f
+    interior = 0
+    left = utils.get_2d_sympy_function(sin(y))
+    right = utils.get_2d_sympy_function(sin(y))
+    top = utils.get_2d_sympy_function(sin(x))
+    bottom = utils.get_2d_sympy_function(sin(x))
 
     boundary = {
         "left": (left, "dirichlet"),
@@ -191,10 +191,11 @@ if __name__ == "__main__":
     }
 
     solver = Poisson2DRectangle(
-        ((-10, -5), (10, 5)), interior, boundary, 100, 100)
+        ((-2*np.pi, -2*np.pi), (2*np.pi, 2*np.pi)), interior, boundary, 100, 100)
 
     gt = f(solver.x_grid, solver.y_grid)
     solution = solver.solve()
 
     utils.plot_3d(solver.x_grid, solver.y_grid, solution, "solution")
-    utils.plot_3d(solver.x_grid, solver.y_grid, gt, "ground truth")
+    utils.plot_2d(solution, "solution")
+    #utils.plot_3d(solver.x_grid, solver.y_grid, gt, "ground truth")

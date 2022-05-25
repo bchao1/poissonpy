@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator
 import numpy as np
+import seaborn as sns
 
 from sympy import lambdify
 from sympy.abc import x, y
@@ -12,6 +13,12 @@ def get_2d_sympy_function(expr):
 def get_grid_ids(grid):
     grid_ids = np.arange(grid.shape[0] * grid.shape[1]).reshape(grid.shape[0], grid.shape[1])
     return grid_ids
+
+def plot_2d(solution, title):
+    sns.heatmap(solution)
+    plt.title(title)
+    plt.axis("off")
+    plt.show()
 
 def plot_3d(X, Y, Z, title):
     fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
