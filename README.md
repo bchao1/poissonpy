@@ -19,7 +19,7 @@ from sympy.abc import x, y
 import poissonpy
 ```
 
-Define functions using `sympy` function expressions or numpy arrays:
+Define functions using `sympy` function expressions or `numpy` arrays:
 
 ```python
 f_expr = sin(x) + cos(y)
@@ -44,8 +44,7 @@ boundary = {
 Initialize solver and solve Poisson equation:
 
 ```python
-solver = Poisson2DRectangle(
-        ((-10, -5), (10, 5)), interior, boundary, X=100, Y=100)
+solver = Poisson2DRectangle(((-10, -5), (10, 5)), interior, boundary, X=100, Y=100)
 solution = solver.solve()
 ```
 

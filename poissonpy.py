@@ -1,7 +1,7 @@
 import numpy as np
 import sympy as sp
 import scipy.sparse
-import pyamg
+import types
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -86,13 +86,22 @@ class Poisson2DRectangle:
         A[self.interior_pos, n3_pos] = 1 / (self.dy**2)
         A[self.interior_pos, n4_pos] = 1 / (self.dy**2)
         A[self.interior_pos, self.interior_pos] = -2 / (self.dx**2) + -2 / (self.dy**2)
-        b[self.interior_pos] = self.interior(self.xs[self.interior_ids], self.ys[self.interior_ids])
+
+        if isinstance(self.interior, types.FunctionType):
+            b[self.interior_pos] = self.interior(self.xs[self.interior_ids], self.ys[self.interior_ids])
+        elif isinstance(self.interior, (np.array, int, float)):
+            b[self.interior_pos] = self.interior
 
 
         for bd, (bd_func, mode) in self.boundary.items():
             bd_pos = boundary_pos[bd]
             bd_ids = boundary_ids[bd]
-            b[bd_pos] = bd_func(self.xs[bd_ids], self.ys[bd_ids])
+
+            if isinstance(bd_func, types.FunctionType):
+                b[bd_pos] = bd_func(self.xs[bd_ids], self.ys[bd_ids])
+            elif isinstance(bd_func, (np.array, int, float)):
+                b[bd_pos] = bd_func
+
             if mode == "dirichlet":
                 A[bd_pos, bd_pos] = 1
             elif mode == "neumann_x":
