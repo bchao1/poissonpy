@@ -160,7 +160,7 @@ if __name__ == "__main__":
     
     # analytic = sin(x) + cos(y)
     # laplacian = -sin(x) - cos(y)
-    f_expr = x * sin(x) + y * cos(y)
+    f_expr = sin(x) + cos(y)
     laplacian_expr = diff(f_expr, x, 2) + diff(f_expr, y, 2)
 
     f = utils.get_2d_sympy_function(f_expr)
