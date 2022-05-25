@@ -10,7 +10,8 @@ Plug-and-play library for solving 2D Poisson equations. Useful tool in scientifi
 ## Usage 
 
 Import necessary libraries. `poissonpy` utilizes `numpy` and `sympy` greatly, so its best to import both:
-```
+
+```python
 import numpy as np
 from sympy import sin, cos
 from sympy.abc import x, y
@@ -19,7 +20,8 @@ import poissonpy
 ```
 
 Define functions using `sympy` function expressions or numpy arrays:
-```
+
+```python
 f_expr = sin(x) + cos(y)
 laplacian_expr = diff(f_expr, x, 2) + diff(f_expr, y, 2)
 
@@ -28,7 +30,8 @@ laplacian = poissonpy.get_2d_sympy_function(laplacian_expr)
 ```
 
 Define interior and boundary conditions:
-```
+
+```python
 interior = laplacian
 boundary = {
     "left": (f, "dirichlet"),
@@ -39,7 +42,8 @@ boundary = {
 ```
 
 Initialize solver and solve Poisson equation:
-```
+
+```python
 solver = Poisson2DRectangle(
         ((-10, -5), (10, 5)), interior, boundary, X=100, Y=100)
 solution = solver.solve()
