@@ -132,13 +132,16 @@ class Poisson2DRectangle:
         solution_grid = solution_grid.reshape(self.Y, self.X)
         return solution_grid
         
-
-
 class Poisson2DRegion:
     """
         Solve 2D Poisson Equation on a region with arbitrary shape.
     """
-    def __init__(self):
+    def __init__(self, grid, region, interior, boundary):
+        self.region = region # region mask
+        self.interior = interior
+        self.boundary = boundary
+
+        self.Y, self.X = self.region.shape
         pass
 
 if __name__ == "__main__": 
