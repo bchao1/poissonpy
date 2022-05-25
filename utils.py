@@ -14,10 +14,15 @@ def get_grid_ids(grid):
     grid_ids = np.arange(grid.shape[0] * grid.shape[1]).reshape(grid.shape[0], grid.shape[1])
     return grid_ids
 
-def plot_2d(solution, title):
-    sns.heatmap(solution)
-    plt.title(title)
-    plt.axis("off")
+def plot_2d(X, Y, Z, title):
+    fig, ax = plt.subplots()
+    heatmap = ax.imshow(Z[::-1], cmap=cm.coolwarm)
+    ax.set_title(title)
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.set_xticks([0, len(X) - 1], np.round(np.array([X[0], X[-1]]), 2))
+    ax.set_yticks([0, len(Y) - 1], np.round(np.array([Y[-1], Y[0]]), 2))
+    fig.colorbar(heatmap, shrink=0.5, aspect=5)
     plt.show()
 
 def plot_3d(X, Y, Z, title):

@@ -26,13 +26,13 @@ class Poisson2DRectangle:
         self.x2, self.y2 = rect[1] # bottom-right corner
         self.X, self.Y = X, Y
 
-        x = np.linspace(self.x1, self.x2, self.X)
-        y = np.linspace(self.y1, self.y2, self.Y)
+        self.x = np.linspace(self.x1, self.x2, self.X)
+        self.y = np.linspace(self.y1, self.y2, self.Y)
         
-        self.dx = x[1] - x[0]
-        self.dy = y[1] - y[0]
+        self.dx = self.x[1] - self.x[0]
+        self.dy = self.y[1] - self.y[0]
 
-        self._x_grid, self._y_grid = np.meshgrid(x, y)
+        self._x_grid, self._y_grid = np.meshgrid(self.x, self.y)
         self.xs = self.x_grid.flatten()
         self.ys = self.y_grid.flatten()
 
@@ -197,5 +197,5 @@ if __name__ == "__main__":
     solution = solver.solve()
 
     utils.plot_3d(solver.x_grid, solver.y_grid, solution, "solution")
-    utils.plot_2d(solution, "solution")
+    utils.plot_2d(solver.x, solver.y, solution, "solution")
     #utils.plot_3d(solver.x_grid, solver.y_grid, gt, "ground truth")
