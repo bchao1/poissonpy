@@ -62,14 +62,14 @@ poissonpy.plot_3d(solver.x_grid, solver.y_grid, f(solver.x_grid, solver.y_grid))
 |![](data/solution.png)|![](data/ground_truth.png)|
 
 ### Laplace Equation
-It's also straightforward to define a Laplace equation - **we simply set the interior laplacian value to 0**. In the following example, we set the boundary values to be sptially-varying periodic functions.
+It's also straightforward to define a Laplace equation - **we simply set the interior laplacian value to 0**. In the following example, we set the boundary values to be spatially-varying periodic functions.
 
 ```python
 interior = 0 # laplace equation form
-left = utils.get_2d_sympy_function(sin(y))
-right = utils.get_2d_sympy_function(sin(y))
-top = utils.get_2d_sympy_function(sin(x))
-bottom = utils.get_2d_sympy_function(sin(x))
+left = poissonpy.get_2d_sympy_function(sin(y))
+right = poissonpy.get_2d_sympy_function(sin(y))
+top = poissonpy.get_2d_sympy_function(sin(x))
+bottom = poissonpy.get_2d_sympy_function(sin(x))
 
 boundary = {
     "left": (left, "dirichlet"),
@@ -85,7 +85,8 @@ Solve the Laplace equation:
 solver = Poisson2DRectangle(
     ((-2*np.pi, -2*np.pi), (2*np.pi, 2*np.pi)), interior, boundary, 100, 100)
 solution = solver.solve()
-utils.plot_3d(solver.x_grid, solver.y_grid, solution, "solution")
+poissonpy.plot_3d(solver.x_grid, solver.y_grid, solution, "solution")
+poissonpy.plot_2d(solution, "solution")
 ```
 
 |3D surface plot|2D heatmap|
