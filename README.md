@@ -49,10 +49,11 @@ solution = solver.solve()
 ```
 
 Plot solution and ground truth:
-```
+```python
 poissonpy.plot_3d(solver.x_grid, solver.y_grid, solution)
 poissonpy.plot_3d(solver.x_grid, solver.y_grid, f(solver.x_grid, solver.y_grid))
 ```
+
 |Solution|Ground truth|
 |--|--|
 |![](data/solution.png)|![](data/ground_truth.png)|
