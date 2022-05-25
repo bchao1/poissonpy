@@ -78,15 +78,31 @@ class Poisson2DRectangle:
         for bd, (bd_func, mode) in self.boundary.items():
             bd_pos = boundary_pos[bd]
             bd_ids = boundary_ids[bd]
+            b[bd_pos] = bd_func(self.xs[bd_ids], self.ys[bd_ids])
             if mode == "dirichlet":
                 A[bd_pos, bd_pos] = 1
-                b[bd_pos] = bd_func(self.xs[bd_ids], self.ys[bd_ids])
-                #print(b[bd_pos])
             elif mode == "neumann_x":
-                pass
+                if bd == "left":
+                    n_ids = bd_ids + 1
+                    n_pos = np.searchsorted(self.all_ids, n_ids)
+                    A[bd_pos, bd_pos] = -1 / self.dx
+                    A[bd_pos, n_pos] = 1 / self.dx
+                else: # right
+                    n_ids = bd_ids - 1
+                    n_pos = np.searchsorted(self.all_ids, n_ids)
+                    A[bd_pos, bd_pos] = 1 / self.dx
+                    A[bd_pos, n_pos] = -1 / self.dx
             elif mode == "neumann_y":
-                pass
-        
+                if bd == "top":
+                    n_ids = bd_ids + self.X
+                    n_pos = np.searchsorted(self.all_ids, n_ids)
+                    A[bd_pos, bd_pos] = -1 / self.dy
+                    A[bd_pos, n_pos] = 1 / self.dy
+                else: 
+                    n_ids = bd_ids - self.X
+                    n_pos = np.searchsorted(self.all_ids, n_ids)
+                    A[bd_pos, bd_pos] = 1 / self.dy
+                    A[bd_pos, n_pos] = -1 / self.dy
         return A.tocsr(), b
 
     def solve(self):
@@ -110,33 +126,35 @@ class Poisson2DRegion:
         pass
 
 if __name__ == "__main__": 
-    from sympy import lambdify, sin, cos
+    from sympy import lambdify, sin, cos, diff
     from sympy.abc import x, y
 
-    func = sin(x) + cos(y)
-    lambda_func = lambdify([x, y], func, "numpy")
+    f = sin(x) + cos(y)
+    laplacian = diff(f, x, 2) + diff(f, y, 2)
+
+    lambda_f = lambdify([x, y], f, "numpy")
 
     # analytic = sin(x) + cos(y)
-    interior = lambdify([x, y], -sin(x)-cos(y), "numpy")
+    interior = lambdify([x, y], laplacian, "numpy")
 
     # possible boundary conditions: neumann_x, neumann_y, dirichlet
 
-    left = lambdify([x, y], func, "numpy")
-    right = lambdify([x, y], func, "numpy")
-    top = lambdify([x, y], func, "numpy")
-    bottom = lambdify([x, y], func, "numpy")
+    left = lambdify([x, y], diff(f, x, 1), "numpy")
+    right = lambdify([x, y], diff(f, x, 1), "numpy")
+    top = lambdify([x, y], diff(f, y, 1), "numpy")
+    bottom = lambdify([x, y], f, "numpy")
 
     boundary = {
-        "left": (left, "dirichlet"),
-        "right": (right, "dirichlet"),
-        "top": (top, "dirichlet"),
+        "left": (left, "neumann_x"),
+        "right": (right, "neumann_x"),
+        "top": (top, "neumann_y"),
         "bottom": (bottom, "dirichlet")
     }
 
     solver = Poisson2DRectangle(
-        ((-6, -6), (6, 6)), interior, boundary, 500, 500)
+        ((-6, -6), (6, 6)), interior, boundary, 100, 100)
 
-    gt = lambda_func(solver.x_grid, solver.y_grid)
+    gt = lambda_f(solver.x_grid, solver.y_grid)
 
     solution = solver.solve()
     utils.plot_3d(solver.x_grid, solver.y_grid, solution)
