@@ -50,7 +50,8 @@ boundary = {
 Initialize solver and solve Poisson equation:
 
 ```python
-solver = Poisson2DRectangle(((-2*np.pi, -2*np.pi), (2*np.pi, 2*np.pi)), interior, boundary, X=100, Y=100)
+solver = Poisson2DRectangle(((-2*np.pi, -2*np.pi), (2*np.pi, 2*np.pi)), 
+    interior, boundary, X=100, Y=100)
 solution = solver.solve()
 ```
 
@@ -84,6 +85,19 @@ boundary = {
 |Solution|Ground truth|Error|
 |--|--|--|
 |![](data/sol_neumann.png)|![](data/gt_neumann.png)|![](data/err_neumann.png)|
+
+### Zero-mean solution
+If the boundary condition is purely Neumann, then the solution is not unique. Naively solving the Poisson equation gives bad results. In this case, you can set the `zero_mean` paramter to `True`, such that the solver finds a zero-mean solution. 
+
+```python
+solver = solvers.Poisson2DRectangle(
+    ((-2*np.pi, -2*np.pi), (2*np.pi, 2*np.pi)), interior, boundary, 
+    X=100, Y=100, zero_mean=True)
+```
+
+|`zero_mean=False`|`zero_mean=True`|Ground truth|
+|--|--|--|
+|![](data/zero_mean_false.png)|![](data/zero_mean_true.png)|![](data/gt_neumann.png)|
 
 ### Laplace Equation
 It's also straightforward to define a Laplace equation - **we simply set the interior laplacian value to 0**. In the following example, we set the boundary values to be spatially-varying periodic functions.

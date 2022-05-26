@@ -14,7 +14,7 @@ class Poisson2DRectangle:
     """ 
         Solve 2D Poisson Equation on a rectangle
     """
-    def __init__(self, rect, interior, boundary, X=100, Y=100):
+    def __init__(self, rect, interior, boundary, X=100, Y=100, zero_mean=False):
         """
         Args:
             rect:
@@ -42,6 +42,8 @@ class Poisson2DRectangle:
             assert bd in ["left", "right", "top", "bottom"] 
             assert mode in ["dirichlet", "neumann_x", "neumann_y"]
         
+        self.zero_mean = zero_mean
+        
         self.A, self.b = self.build_linear_system()
 
     @property
@@ -66,8 +68,12 @@ class Poisson2DRectangle:
         self.all_ids = np.concatenate([self.interior_ids, np.concatenate(list(boundary_ids.values()))]) 
         self.all_ids.sort()
 
-        A = scipy.sparse.lil_matrix((len(self.all_ids), len(self.all_ids)))
-        b = np.zeros(len(self.all_ids))
+        if self.zero_mean:
+            A = scipy.sparse.lil_matrix((len(self.all_ids) + 1, len(self.all_ids) + 1))
+            b = np.zeros(len(self.all_ids) + 1)
+        else:
+            A = scipy.sparse.lil_matrix((len(self.all_ids), len(self.all_ids)))
+            b = np.zeros(len(self.all_ids))
 
         self.interior_pos = np.searchsorted(self.all_ids, self.interior_ids)
         boundary_pos = {
@@ -91,7 +97,12 @@ class Poisson2DRectangle:
             b[self.interior_pos] = self.interior(self.xs[self.interior_ids], self.ys[self.interior_ids])
         elif isinstance(self.interior, (int, float)):
             b[self.interior_pos] = self.interior
-
+        
+        if self.zero_mean:
+            A[-1, :] = 1.0 
+            A[:, -1] = 1.0
+            A[-1, -1] = 0
+            b[-1] = 0
 
         for bd, (bd_func, mode) in self.boundary.items():
             bd_pos = boundary_pos[bd]
@@ -132,6 +143,8 @@ class Poisson2DRectangle:
         # multigrid solver result bad?
         #x = scipy.sparse.linalg.bicg(A, b)[0]
         x = scipy.sparse.linalg.spsolve(self.A, self.b)
+        if self.zero_mean:
+            x = x[:-1]
 
         grid_ids = np.arange(self.Y * self.X)
         all_pos = np.searchsorted(grid_ids, self.all_ids)
