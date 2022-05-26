@@ -4,7 +4,7 @@ from sympy import sin, cos
 from sympy.abc import x, y
 
 from context import poissonpy
-from poissonpy import utils, solvers
+from poissonpy import functional, utils, solvers
 
     
 # analytic = sin(x) + cos(y)
@@ -12,12 +12,12 @@ from poissonpy import utils, solvers
 # x derivative = cos(x)
 # y derivative = -sin(y)
 f_expr = sin(x) + cos(y)
-laplacian_expr = utils.get_sp_laplacian_expr(f_expr)
-x_derivative_expr = utils.get_sp_derivative_expr(f_expr, x)
-y_derivative_expr = utils.get_sp_derivative_expr(f_expr, y)
+laplacian_expr = functional.get_sp_laplacian_expr(f_expr)
+x_derivative_expr = functional.get_sp_derivative_expr(f_expr, x)
+y_derivative_expr = functional.get_sp_derivative_expr(f_expr, y)
 
-f = utils.get_sp_function(f_expr)
-laplacian = utils.get_sp_function(laplacian_expr)
+f = functional.get_sp_function(f_expr)
+laplacian = functional.get_sp_function(laplacian_expr)
 
 # possible boundary conditions: neumann_x, neumann_y, dirichlet
 interior = laplacian
@@ -39,6 +39,6 @@ gt = f(solver.x_grid, solver.y_grid)
 
 solution = solver.solve()
 
+utils.plot_3d(solver.x_grid, solver.y_grid, gt, "ground truth")
 utils.plot_3d(solver.x_grid, solver.y_grid, solution, "solution")
 utils.plot_2d(solver.x, solver.y, solution, "solution")
-#utils.plot_3d(solver.x_grid, solver.y_grid, gt, "ground truth")

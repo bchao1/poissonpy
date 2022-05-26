@@ -4,7 +4,7 @@ from sympy import sin, cos
 from sympy.abc import x, y
 
 from context import poissonpy
-from poissonpy import utils, solvers
+from poissonpy import functional, utils, solvers
 
     
 # analytic = sin(x) + cos(y)
@@ -12,18 +12,18 @@ from poissonpy import utils, solvers
 # x derivative = cos(x)
 # y derivative = -sin(y)
 f_expr = sin(x) + cos(y)
-laplacian_expr = utils.get_sp_laplacian_expr(f_expr)
-x_derivative_expr = utils.get_sp_derivative_expr(f_expr, x)
-y_derivative_expr = utils.get_sp_derivative_expr(f_expr, y)
+laplacian_expr = functional.get_sp_laplacian_expr(f_expr)
+x_derivative_expr = functional.get_sp_derivative_expr(f_expr, x)
+y_derivative_expr = functional.get_sp_derivative_expr(f_expr, y)
 
-f = utils.get_sp_function(f_expr)
-laplacian = utils.get_sp_function(laplacian_expr)
+f = functional.get_sp_function(f_expr)
+laplacian = functional.get_sp_function(laplacian_expr)
 
 # possible boundary conditions: neumann_x, neumann_y, dirichlet
 interior = laplacian
-left = utils.get_sp_function(x_derivative_expr)
+left = functional.get_sp_function(x_derivative_expr)
 right = f
-top = utils.get_sp_function(y_derivative_expr)
+top = functional.get_sp_function(y_derivative_expr)
 bottom = f
 
 boundary = {
