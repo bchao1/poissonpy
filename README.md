@@ -50,7 +50,7 @@ boundary = {
 Initialize solver and solve Poisson equation:
 
 ```python
-solver = Poisson2DRectangle(((-10, -5), (10, 5)), interior, boundary, X=100, Y=100)
+solver = Poisson2DRectangle(((-2*np.pi, -2*np.pi), (2*np.pi, 2*np.pi)), interior, boundary, X=100, Y=100)
 solution = solver.solve()
 ```
 
