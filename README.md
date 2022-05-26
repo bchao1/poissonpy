@@ -142,4 +142,6 @@ solution = solver.solve()
 blended = mask * solution + (1 - mask) * target
 ```
 
-![](data/poisson_image_editing/result.png)
+<p align="center">
+    <img src="data/poisson_image_editing/result.png" width=300>
+</p>
