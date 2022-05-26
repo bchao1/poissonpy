@@ -143,5 +143,5 @@ blended = mask * solution + (1 - mask) * target
 ```
 
 <p align="center">
-    <img src="data/poisson_image_editing/result.png" width=300>
+    <img src="data/poisson_image_editing/result.png" width=600>
 </p>
