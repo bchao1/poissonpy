@@ -18,21 +18,24 @@ import numpy as np
 from sympy import sin, cos
 from sympy.abc import x, y
 
-import poissonpy
+from poissonpy import functional, utils, sovlers
 ```
 
-### Compare with Analytical Solution
+### Defining `sympy` functions
+In the following examples, we use a ground truth function to create a mock Poisson equation and compare the solver's solution with the analytical solution. 
+   
 Define functions using `sympy` function expressions or `numpy` arrays:
 
 ```python
-f_expr = sin(x) + cos(y)
-laplacian_expr = diff(f_expr, x, 2) + diff(f_expr, y, 2)
+f_expr = sin(x) + cos(y) # create sympy function expression
+laplacian_expr = functional.get_sp_laplacian_expr(f_expr) # create sympy laplacian function expression
 
-f = poissonpy.get_2d_sympy_function(f_expr)
-laplacian = poissonpy.get_2d_sympy_function(laplacian_expr)
+f = functional.get_sp_function(f_expr) # create sympy function
+laplacian = functional.get_sp_function(laplacian_expr) # create sympy function
 ```
 
-Define interior and boundary conditions:
+### Dirichlet Boundary Conditions
+Define interior and Dirichlet boundary conditions:
 
 ```python
 interior = laplacian
@@ -59,7 +62,28 @@ poissonpy.plot_3d(solver.x_grid, solver.y_grid, f(solver.x_grid, solver.y_grid))
 
 |Solution|Ground truth|
 |--|--|
-|![](data/solution.png)|![](data/ground_truth.png)|
+|![](data/sol_dirichlet.png)|![](data/gt_dirichlet.png)|
+
+### Neumann Boundary Conditions
+You can also define Neumann boundary conditions by specifying `neumann_x` and `neumann_y` in the boundary condition parameter.
+
+```python
+
+x_derivative_expr = functional.get_sp_derivative_expr(f_expr, x)
+y_derivative_expr = functional.get_sp_derivative_expr(f_expr, y)
+
+interior = laplacian
+boundary = {
+    "left": (f, "dirichlet"),
+    "right": (functional.get_sp_function(x_derivative_expr), "neumann_x"),
+    "top": (f, "dirichlet"),
+    "bottom": (functional.get_sp_function(y_derivative_expr), "neumann_y")
+}
+```
+
+|Solution|Ground truth|
+|--|--|
+|![](data/sol_neumann.png)|![](data/gt_neumann.png)|
 
 ### Laplace Equation
 It's also straightforward to define a Laplace equation - **we simply set the interior laplacian value to 0**. In the following example, we set the boundary values to be spatially-varying periodic functions.
