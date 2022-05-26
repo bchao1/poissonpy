@@ -38,7 +38,9 @@ solver = solvers.Poisson2DRectangle(
 gt = f(solver.x_grid, solver.y_grid)
 
 solution = solver.solve()
+err = np.abs(gt - solution)
 
 utils.plot_3d(solver.x_grid, solver.y_grid, gt, "ground truth")
 utils.plot_3d(solver.x_grid, solver.y_grid, solution, "solution")
 utils.plot_2d(solver.x, solver.y, solution, "solution")
+utils.plot_2d(solver.x, solver.y, err, "error")

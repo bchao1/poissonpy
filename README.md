@@ -60,9 +60,9 @@ poissonpy.plot_3d(solver.x_grid, solver.y_grid, solution)
 poissonpy.plot_3d(solver.x_grid, solver.y_grid, f(solver.x_grid, solver.y_grid))
 ```
 
-|Solution|Ground truth|
-|--|--|
-|![](data/sol_dirichlet.png)|![](data/gt_dirichlet.png)|
+|Solution|Ground truth|Error|
+|--|--|--|
+|![](data/sol_dirichlet.png)|![](data/gt_dirichlet.png)|![](data/err_dirichlet.png)|
 
 ### Neumann Boundary Conditions
 You can also define Neumann boundary conditions by specifying `neumann_x` and `neumann_y` in the boundary condition parameter.
@@ -81,9 +81,9 @@ boundary = {
 }
 ```
 
-|Solution|Ground truth|
-|--|--|
-|![](data/sol_neumann.png)|![](data/gt_neumann.png)|
+|Solution|Ground truth|Error|
+|--|--|--|
+|![](data/sol_neumann.png)|![](data/gt_neumann.png)|![](data/err_neumann.png)|
 
 ### Laplace Equation
 It's also straightforward to define a Laplace equation - **we simply set the interior laplacian value to 0**. In the following example, we set the boundary values to be spatially-varying periodic functions.
