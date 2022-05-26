@@ -1,18 +1,63 @@
+import numpy as np
+
+import scipy.signal
+from skimage.segmentation import find_boundaries
+
+import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator
-import numpy as np
-import seaborn as sns
 
-from skimage.segmentation import find_boundaries
-
-from sympy import lambdify
+from sympy import lambdify, diff
 from sympy.abc import x, y
 
-def get_2d_sympy_function(expr):
+# Function related
+def get_sp_function(expr):
     return lambdify([x, y], expr, "numpy")
 
+def get_sp_laplacian_expr(expr):
+    return diff(expr, x, 2) + diff(expr, y, 2)
 
+def get_sp_derivative_expr(expr, var):
+    return diff(expr, var, 1)
+    
+def get_np_gradient(arr, dx=1, dy=1, forward=True):
+    if forward:
+        kx = np.array([
+            [0, 0, 0],
+            [0, -1/dx, 1/dx],
+            [0, 0, 0]
+        ])
+        ky = np.array([
+            [0, 0, 0],
+            [0, -1/dy, 0],
+            [0, 1/dy, 0]
+        ])
+    else:
+        kx = np.array([
+            [0, 0, 0],
+            [-1/dx, 1/dx, 0],
+            [0, 0, 0]
+        ])
+        ky = np.array([
+            [0, -1/dy, 0],
+            [0, 1/dy, 0],
+            [0, 0, 0]
+        ])
+    Gx = scipy.signal.fftconvolve(arr, kx, mode="same")
+    Gy = scipy.signal.fftconvolve(arr, ky, mode="same")
+    return Gx, Gy
+
+def get_np_laplacian(arr, dx=1, dy=1):
+    kernel = np.array([
+        [0, 1/(dy**2), 0],
+        [1/(dx**2), -2/(dx**2)-2/(dy**2), 1/(dx**2)],
+        [0, 1/(dy**2), 0]
+    ])
+    laplacian = scipy.signal.fftconvolve(arr, kernel, mode="same")
+    return laplacian
+
+# Helper functions
 def process_mask(mask):
     boundary = find_boundaries(mask, mode="inner").astype(int)
     inner = mask - boundary
@@ -27,6 +72,7 @@ def get_selected_values(values, mask):
     nonzero_idx = np.nonzero(mask) # get mask 1
     return values[nonzero_idx]
 
+# Plotting
 def plot_2d(X, Y, Z, title):
     fig, ax = plt.subplots()
     heatmap = ax.imshow(Z[::-1], cmap=cm.coolwarm)

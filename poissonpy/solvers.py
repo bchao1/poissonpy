@@ -5,7 +5,7 @@ import types
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-import utils
+from . import utils
 
 # inner region conditions 
 # laplacian diag matrix construction
@@ -206,40 +206,3 @@ class Poisson2DRegion:
         solution_grid[self.region_pos] = x
         solution_grid = solution_grid.reshape(self.Y, self.X)
         return solution_grid
-
-if __name__ == "__main__": 
-    from sympy import lambdify, sin, cos, diff, Pow
-    from sympy.abc import x, y
-    
-    # analytic = sin(x) + cos(y)
-    # laplacian = -sin(x) - cos(y)
-    f_expr = sin(x) + cos(y)
-    laplacian_expr = diff(f_expr, x, 2) + diff(f_expr, y, 2)
-
-    f = utils.get_2d_sympy_function(f_expr)
-    laplacian = utils.get_2d_sympy_function(laplacian_expr)
-
-    # possible boundary conditions: neumann_x, neumann_y, dirichlet
-
-    interior = 0
-    left = utils.get_2d_sympy_function(sin(y))
-    right = utils.get_2d_sympy_function(sin(y))
-    top = utils.get_2d_sympy_function(sin(x))
-    bottom = utils.get_2d_sympy_function(sin(x))
-
-    boundary = {
-        "left": (left, "dirichlet"),
-        "right": (right, "dirichlet"),
-        "top": (top, "dirichlet"),
-        "bottom": (bottom, "dirichlet")
-    }
-
-    solver = Poisson2DRectangle(
-        ((-2*np.pi, -2*np.pi), (2*np.pi, 2*np.pi)), interior, boundary, 100, 100)
-
-    gt = f(solver.x_grid, solver.y_grid)
-    solution = solver.solve()
-
-    utils.plot_3d(solver.x_grid, solver.y_grid, solution, "solution")
-    utils.plot_2d(solver.x, solver.y, solution, "solution")
-    #utils.plot_3d(solver.x_grid, solver.y_grid, gt, "ground truth")
