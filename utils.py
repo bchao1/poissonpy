@@ -4,15 +4,28 @@ from matplotlib.ticker import LinearLocator
 import numpy as np
 import seaborn as sns
 
+from skimage.segmentation import find_boundaries
+
 from sympy import lambdify
 from sympy.abc import x, y
 
 def get_2d_sympy_function(expr):
     return lambdify([x, y], expr, "numpy")
 
-def get_grid_ids(grid):
-    grid_ids = np.arange(grid.shape[0] * grid.shape[1]).reshape(grid.shape[0], grid.shape[1])
+
+def process_mask(mask):
+    boundary = find_boundaries(mask, mode="inner").astype(int)
+    inner = mask - boundary
+    return inner, boundary
+
+def get_grid_ids(X, Y):
+    grid_ids = np.arange(Y * X).reshape(Y, X)
     return grid_ids
+
+def get_selected_values(values, mask):
+    assert values.shape == mask.shape
+    nonzero_idx = np.nonzero(mask) # get mask 1
+    return values[nonzero_idx]
 
 def plot_2d(X, Y, Z, title):
     fig, ax = plt.subplots()
