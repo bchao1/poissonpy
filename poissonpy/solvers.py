@@ -5,7 +5,7 @@ import types
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from . import utils
+from . import functional, helpers
 
 # inner region conditions 
 # laplacian diag matrix construction
@@ -155,7 +155,7 @@ class Poisson2DRegion:
     """
         Solve 2D Poisson Equation on a region with arbitrary shape.
     """
-    def __init__(self, grid, region, interior, boundary):
+    def __init__(self, region, interior, boundary):
         self.region = region # region mask
         self.interior = interior
         self.boundary = boundary
@@ -164,13 +164,15 @@ class Poisson2DRegion:
         self.A, self.b = self.build_linear_system()
     
     def build_linear_system(self):
-        self.inner_region, self.boundary_region = utils.process_mask(self.region)
-        self.grid_ids = utils.get_grid_ids(self.X, self.Y)
-
-        self.inner_ids = utils.get_selected_values(self.grid_ids, self.inner_region).flatten()
-        self.boundary_ids = utils.get_selected_values(self.grid_ids, self.boundary_region).flatten()
-        self.region_ids = utils.get_selected_values(self.grid_ids, self.region).flatten() # boundary + inner
+        self.inner_region, self.boundary_region = helpers.process_mask(self.region)
+        self.grid_ids = helpers.get_grid_ids(self.X, self.Y)
         
+
+        self.inner_ids = helpers.get_selected_values(self.grid_ids, self.inner_region).flatten()
+        self.boundary_ids = helpers.get_selected_values(self.grid_ids, self.boundary_region).flatten()
+        self.region_ids = helpers.get_selected_values(self.grid_ids, self.region).flatten() # boundary + inner
+
+        print(self.grid_ids.size)
         self.inner_pos = np.searchsorted(self.region_ids, self.inner_ids) 
         self.boundary_pos = np.searchsorted(self.region_ids, self.boundary_ids)
         self.region_pos = np.searchsorted(self.grid_ids.flatten(), self.region_ids)
@@ -189,8 +191,8 @@ class Poisson2DRegion:
         A[self.boundary_pos, self.boundary_pos] = 1 # only dirichlet for now
         A = A.tocsr()
 
-        boundary_conditions = utils.get_selected_values(target, self.boundary_mask).flatten()
-        interior_laplacians = utils.get_selected_values(self.interior, self.inner_mask).flatten()
+        boundary_conditions = helpers.get_selected_values(self.boundary, self.boundary_region).flatten()
+        interior_laplacians = helpers.get_selected_values(self.interior, self.inner_region).flatten()
         b = np.zeros(len(self.region_ids))
         b[self.inner_pos] = interior_laplacians
         b[self.boundary_pos] = boundary_conditions

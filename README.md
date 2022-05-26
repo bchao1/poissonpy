@@ -116,3 +116,30 @@ poissonpy.plot_2d(solution, "solution")
 |3D surface plot|2D heatmap|
 |--|--|
 |![](data/laplace_sol_3d.png)|![](data/laplace_sol_2d.png)|
+
+### Arbitrary-shaped domain
+Use the `Poisson2DRegion` class to solve the Poisson eqaution on a arbitrary-shaped function domain. `poissonpy` can be seamlessly integrated in gradient-domain image processing algorithms.
+   
+An example of using `poissonpy` to implement the paper [Poisson Image Editing](https://www.cs.jhu.edu/~misha/Fall07/Papers/Perez03.pdf) by Perez et al., 2003. See `examples/poisson_image_editing.py` for more details. 
+
+```python
+# compute laplacian of interpolation function
+Gx_src, Gy_src = functional.get_np_gradient(source)
+Gx_target, Gy_target = functional.get_np_gradient(target)
+G_src_mag = (Gx_src**2 + Gy_src**2)**0.5
+G_target_mag = (Gx_target**2 + Gy_target**2)**0.5
+Gx = np.where(G_src_mag > G_target_mag, Gx_src, Gx_target)
+Gy = np.where(G_src_mag > G_target_mag, Gy_src, Gy_target)
+Gxx, _ = functional.get_np_gradient(Gx, forward=False)
+_, Gyy = functional.get_np_gradient(Gy, forward=False)
+laplacian = Gxx + Gyy
+    
+# solve interpolation function
+solver = solvers.Poisson2DRegion(mask, laplacian, target)
+solution = solver.solve()
+
+# alpha-blend interpolation and target function
+blended = mask * solution + (1 - mask) * target
+```
+
+![](data/poisson_image_editing/result.png)
