@@ -182,7 +182,3 @@ res = solver.solve()
 <p align="center">
     <img src="data/flash_noflash/result.png" width=600>
 </p>
-
-<p align="center">
-    <img src="data/flash_noflash/artifacts.png" width=600>
-</p>
