@@ -27,9 +27,12 @@ for i in range(ambient_rgb.shape[-1]):
     gy_f_proj = t * gy_a
 
     lap = functional.get_np_div(gx_f_proj, gy_f_proj)
+
     solver = solvers.Poisson2DRegion(mask, lap, flash)
+
     res = solver.solve()
     res_rgb.append(res)
+
 res_rgb = np.dstack(res_rgb)
 res_rgb = np.clip(res_rgb, 0, 1)
 
@@ -45,3 +48,15 @@ axes[1].axis("off")
 axes[2].axis("off")
 plt.tight_layout()
 plt.show()
+
+fig, axes = plt.subplots(1, 2)
+axes[0].imshow(ambient_rgb - res_rgb)
+axes[1].imshow(flash_rgb - res_rgb)
+axes[0].set_title("ambient artifacts")
+axes[1].set_title("flash artifacts")
+axes[0].axis("off")
+axes[1].axis("off")
+plt.tight_layout()
+plt.show()
+
+
