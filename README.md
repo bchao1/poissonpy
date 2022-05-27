@@ -157,7 +157,7 @@ blended = mask * solution + (1 - mask) * target
 ```
 
 <p align="center">
-    <img src="data/poisson_image_editing/result.png" width=900>
+    <img src="data/poisson_image_editing/result.png" width=600>
 </p>
 
 Another example of using `poissonpy` to implement flash artifacts and reflection removal, using the algorithm proposed in [Removing Photography Artifacts using Gradient Projection and Flash-Exposure Sampling](http://www.cs.columbia.edu/cg/pdfs/114-flashReflectionsRaskarSig05.pdf) by Agrawal et al. 2005. See `examples/flash_noflash.py` for more details.
@@ -180,7 +180,7 @@ res = solver.solve()
 ```
 
 <p align="center">
-    <img src="data/flash_noflash/result.png" width=900>
+    <img src="data/flash_noflash/result.png" width=600>
 </p>
 
 <p align="center">
