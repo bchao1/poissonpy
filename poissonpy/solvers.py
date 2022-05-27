@@ -185,7 +185,6 @@ class Poisson2DRegion:
         self.boundary_ids = helpers.get_selected_values(self.grid_ids, self.boundary_region).flatten()
         self.region_ids = helpers.get_selected_values(self.grid_ids, self.region).flatten() # boundary + inner
 
-        print(self.grid_ids.size)
         self.inner_pos = np.searchsorted(self.region_ids, self.inner_ids) 
         self.boundary_pos = np.searchsorted(self.region_ids, self.boundary_ids)
         self.region_pos = np.searchsorted(self.grid_ids.flatten(), self.region_ids)

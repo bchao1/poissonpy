@@ -134,7 +134,7 @@ poissonpy.plot_2d(solution, "solution")
 ### Arbitrary-shaped domain
 Use the `Poisson2DRegion` class to solve the Poisson eqaution on a arbitrary-shaped function domain. `poissonpy` can be seamlessly integrated in gradient-domain image processing algorithms.
    
-An example of using `poissonpy` to implement the paper [Poisson Image Editing](https://www.cs.jhu.edu/~misha/Fall07/Papers/Perez03.pdf) by Perez et al., 2003. See `examples/poisson_image_editing.py` for more details. 
+The following is an example where `poissonpy` is used to implement the image cloning algorithm proposed in [Poisson Image Editing](https://www.cs.jhu.edu/~misha/Fall07/Papers/Perez03.pdf) by Perez et al., 2003. See `examples/poisson_image_editing.py` for more details. 
 
 ```python
 # compute laplacian of interpolation function
@@ -158,4 +158,27 @@ blended = mask * solution + (1 - mask) * target
 
 <p align="center">
     <img src="data/poisson_image_editing/result.png" width=600>
+</p>
+
+Another example of using `poissonpy` to implement flash artifacts and reflection removal, using the algorithm proposed in [Removing Photography Artifacts using Gradient Projection and Flash-Exposure Sampling](http://www.cs.columbia.edu/cg/pdfs/114-flashReflectionsRaskarSig05.pdf) by Agrawal et al. 2005. See `examples/flash_noflash.py` for more details.
+
+```python
+Gx_a, Gy_a = functional.get_np_gradient(ambient)
+Gx_f, Gy_f = functional.get_np_gradient(flash)
+
+# gradient projection
+t = (Gx_a * Gx_f + Gy_a * Gy_f) / (Gx_a**2 + Gy_a**2 + 1e-8)
+Gx_f_proj = t * Gx_a
+Gy_f_proj = t * Gy_a
+
+# compute laplacian (div of gradient)
+lap = functional.get_np_div(Gx_f_proj, Gy_f_proj)
+
+# integrate laplacian field
+solver = solvers.Poisson2DRegion(mask, lap, flash)
+res = solver.solve()
+```
+
+<p align="center">
+    <img src="data/flash_noflash/result.png" width=600>
 </p>

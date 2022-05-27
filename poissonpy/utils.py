@@ -1,8 +1,21 @@
+import os
+from PIL import Image
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator
+
+# Image utils
+def read_image(filename, scale=1):
+    img = Image.open(os.path.join(filename))
+    if scale != 1:
+        w, h = img.size
+        img = img.resize((int(w * scale), int(h * scale)), Image.BICUBIC)
+    img = np.array(img)
+    if len(img.shape) == 3:
+        img = img[..., :3]
+    return img.astype(np.float64) / 255 # only first 3
 
 # Plotting
 def plot_2d(X, Y, Z, title):
