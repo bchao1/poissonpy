@@ -37,6 +37,16 @@ for i in range(source.shape[-1]):
 blended_rgb = np.dstack(blended_rgb)
 blended_rgb = np.clip(blended_rgb, 0, 1)
 
-plt.imshow(blended_rgb)
-plt.axis("off")
+
+fig, axes = plt.subplots(1, 3)
+axes[0].imshow(source)
+axes[1].imshow(target)
+axes[2].imshow(blended_rgb)
+axes[0].set_title("source")
+axes[1].set_title("target")
+axes[2].set_title("result")
+axes[0].axis("off")
+axes[1].axis("off")
+axes[2].axis("off")
+plt.tight_layout()
 plt.show()
