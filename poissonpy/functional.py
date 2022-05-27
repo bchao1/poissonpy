@@ -50,3 +50,8 @@ def get_np_laplacian(arr, dx=1, dy=1):
     ])
     laplacian = scipy.signal.fftconvolve(arr, kernel, mode="same")
     return laplacian
+
+def get_np_div(gx, gy, dx=1, dy=1):
+    gxx, _ = get_np_gradient(gx, dx, dy, forward=False)
+    _, gyy = get_np_gradient(gy, dx, dy, forward=False)
+    return gxx + gyy

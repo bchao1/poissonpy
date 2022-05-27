@@ -101,7 +101,7 @@ class Poisson2DRectangle:
         if self.zero_mean:
             A[-1, :] = 1.0 
             A[:, -1] = 1.0
-            A[-1, -1] = 0
+            A[-1, -1] = 0.0
             b[-1] = 0
 
         for bd, (bd_func, mode) in self.boundary.items():

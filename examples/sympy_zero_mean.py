@@ -34,7 +34,7 @@ boundary = {
 }
 
 solver = solvers.Poisson2DRectangle(
-    ((-2*np.pi, -2*np.pi), (2*np.pi, 2*np.pi)), interior, boundary, 100, 100, zero_mean=False)
+    ((-2*np.pi, -2*np.pi), (2*np.pi, 2*np.pi)), interior, boundary, 100, 100, zero_mean=True)
 gt = f(solver.x_grid, solver.y_grid)
 
 solution = solver.solve()
