@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 from context import poissonpy
 from poissonpy import functional, utils, solvers
 
-ambient_rgb = utils.read_image("../data/flash_noflash/Objects_010_ambient.png", 0.25)
-flash_rgb = utils.read_image("../data/flash_noflash/Objects_010_flash.png", 0.25)
+ambient_rgb = utils.read_image("../data/flash_noflash/Shelves_007_ambient.png", 0.25)
+flash_rgb = utils.read_image("../data/flash_noflash/Shelves_007_flash.png", 0.25)
 mask = np.ones_like(ambient_rgb[..., 0])
 
 ambient_rgb = np.pad(ambient_rgb, ((1, 1), (1, 1), (0, 0)), constant_values=1)
@@ -19,16 +19,32 @@ for i in range(ambient_rgb.shape[-1]):
     ambient = ambient_rgb[..., i]
     flash = flash_rgb[..., i]
 
+    # compute image gradients
     gx_a, gy_a = functional.get_np_gradient(ambient)
     gx_f, gy_f = functional.get_np_gradient(flash)
+    
+    # gradient coherence map
+    M = np.abs(gx_a * gx_f + gy_a * gy_f) / (functional.get_np_gradient_amplitude(gx_a, gy_a) * functional.get_np_gradient_amplitude(gx_f, gy_f) + 1e-8)
+    reversal = (gx_a * gx_f + gy_a * gy_f) / (functional.get_np_gradient_amplitude(gx_a, gy_a) * functional.get_np_gradient_amplitude(gx_f, gy_f) + 1e-8) < 0
+    # saturation map
+    w_s = utils.normalize(np.tanh(40 * (utils.normalize(flash) - 0.9)))
 
-    t = (gx_a*gx_f + gy_a*gy_f) / (gx_a**2 + gy_a**2 + 1e-8)
-    gx_f_proj = t * gx_a
-    gy_f_proj = t * gy_a
+    t = np.abs(gx_a*gx_f + gy_a*gy_f) / (gx_f**2 + gy_f**2)
+    gx_a_proj = t * gx_f
+    gy_a_proj = t * gy_f
+    gx_a_proj = np.where(reversal, -gx_a_proj, gx_a_proj)
+    gy_a_proj = np.where(reversal, -gy_a_proj, gy_a_proj)
+    #plt.imshow(gx_a_proj, cmap="gray")
+    #plt.show()
 
-    lap = functional.get_np_div(gx_f_proj, gy_f_proj)
+    gx_a_new = gx_a_proj#w_s * gx_a + (1 - w_s) * (gx_a_proj)
+    gy_a_new = gy_a_proj#w_s * gy_a + (1 - w_s) * (gy_a_proj)
+    #gx_f_new = w_s * gx_a + (1 - w_s) * (M * gx_f + (1 - M) * gx_a)
+    #gy_f_new = w_s * gy_a + (1 - w_s) * (M * gy_f + (1 - M) * gy_a)
 
-    solver = solvers.Poisson2DRegion(mask, lap, flash)
+    lap = functional.get_np_div(gx_a_new, gy_a_new)
+
+    solver = solvers.Poisson2DRegion(mask, lap, ambient)
 
     res = solver.solve()
     res_rgb.append(res)

@@ -168,12 +168,37 @@ class Poisson2DRegion:
     """
         Solve 2D Poisson Equation on a region with arbitrary shape.
     """
-    def __init__(self, region, interior, boundary):
+    def __init__(self, region, interior, boundary, rect=None):
         self.region = region # region mask
-        self.interior = interior
-        self.boundary = boundary
-
         self.Y, self.X = self.region.shape
+
+        if rect:
+            x0, y0 = rect[0]
+            x1, y1 = rect[1]
+            self.x = np.linspace(x0, x1, self.X)
+            self.y = np.linspace(y0, y1, self.Y)
+        else:
+            self.x = np.arange(self.X)
+            self.y = np.arange(self.Y)
+        self.x_grid, self.y_grid = np.meshgrid(self.x, self.y)
+        
+        self.dx = self.x[1] - self.x[0]
+        self.dy = self.y[1] - self.y[0]
+
+        if isinstance(interior, types.FunctionType):
+           self.interior = interior(self.x_grid, self.y_grid)
+        elif isinstance(interior, (int, float)):
+            self.interior = np.ones_like(region) * interior
+        else:
+            self.interior = interior
+
+        if isinstance(boundary, types.FunctionType):
+            self.boundary = boundary(self.x_grid, self.y_grid)
+        elif isinstance(boundary, (int, float)):
+            self.boundary = np.ones_like(region) * boundary
+        else:
+            self.boundary = boundary
+
         self.A, self.b = self.build_linear_system()
     
     def build_linear_system(self):
@@ -195,11 +220,12 @@ class Poisson2DRegion:
         n4_pos = np.searchsorted(self.region_ids, self.inner_ids + self.X)
 
         A = scipy.sparse.lil_matrix((len(self.region_ids), len(self.region_ids)))
-        A[self.inner_pos, n1_pos] = 1
-        A[self.inner_pos, n2_pos] = 1
-        A[self.inner_pos, n3_pos] = 1
-        A[self.inner_pos, n4_pos] = 1
-        A[self.inner_pos, self.inner_pos] = -4 
+        A[self.inner_pos, n1_pos] = 1 / (self.dx**2)
+        A[self.inner_pos, n2_pos] = 1 / (self.dx**2)
+        A[self.inner_pos, n3_pos] = 1 / (self.dy**2)
+        A[self.inner_pos, n4_pos] = 1 / (self.dy**2)
+        A[self.inner_pos, self.inner_pos] = -2 / (self.dx**2) + -2 / (self.dy**2)
+
         A[self.boundary_pos, self.boundary_pos] = 1 # only dirichlet for now
         A = A.tocsr()
 

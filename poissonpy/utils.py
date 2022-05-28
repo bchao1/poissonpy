@@ -17,6 +17,15 @@ def read_image(filename, scale=1):
         img = img[..., :3]
     return img.astype(np.float64) / 255 # only first 3
 
+def normalize(img):
+    return (img - img.min()) / (img.max() - img.min())
+
+def circle_region(X, Y, r):
+    o_x, o_y = X // 2, Y // 2
+    x_grid, y_grid = np.meshgrid(np.arange(X), np.arange(Y))
+    circ = (((x_grid - o_x)**2 + (y_grid - o_y)**2) < r**2).astype(np.int)
+    return circ
+
 # Plotting
 def plot_2d(X, Y, Z, title):
     fig, ax = plt.subplots()

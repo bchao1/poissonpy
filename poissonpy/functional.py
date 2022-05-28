@@ -55,3 +55,6 @@ def get_np_div(gx, gy, dx=1, dy=1):
     gxx, _ = get_np_gradient(gx, dx, dy, forward=False)
     _, gyy = get_np_gradient(gy, dx, dy, forward=False)
     return gxx + gyy
+
+def get_np_gradient_amplitude(gx, gy):
+    return np.sqrt(gx**2 + gy**2)
